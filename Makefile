@@ -26,12 +26,14 @@ help: ## This help.
 debug: ## Build the container
 	docker build -t $(NAME):$(GOARCH) \
 	--build-arg BASEIMAGE=$(BASENAME) \
-	--build-arg VERSION=$(SNAME)_$(GOARCH)_$(VER) .
+	--build-arg VERSION=$(GOARCH)_$(VER) .
 build: ## Build the container
-	docker build --no-cache -t $(NAME):$(GOARCH) --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+	docker build --no-cache -t $(NAME):$(GOARCH) \
+	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 	--build-arg VCS_REF=`git rev-parse --short HEAD` \
 	--build-arg BASEIMAGE=$(BASENAME) \
-	--build-arg VERSION=$(SNAME)_$(GOARCH)_$(VER) . > ../builds/$(SNAME)_$(GOARCH)_$(VER)_`date +"%Y%m%d_%H%M%S"`.txt
+	--build-arg VERSION=$(GOARCH)_$(VER) \
+	. > ../builds/$(SNAME)_$(GOARCH)_$(VER)_`date +"%Y%m%d_%H%M%S"`.txt
 tag: ## Tag the container
 	docker tag $(NAME):$(GOARCH) $(NAME):$(GOARCH)_$(VER)
 push: ## Push the container
@@ -39,7 +41,12 @@ push: ## Push the container
 	docker push $(NAME):$(GOARCH)	
 deploy: build tag push
 manifest: ## Create an push manifest
-	docker manifest create $(NAME):$(VER) $(NAME):$(GOARCH)_$(VER) $(NAME):$(ARCH2)_$(VER) $(NAME):$(ARCH3)_$(VER)
+	docker manifest create $(NAME):$(VER) \
+	$(NAME):$(GOARCH)_$(VER) \
+	$(NAME):$(ARCH2)_$(VER) \
+	$(NAME):$(ARCH3)_$(VER)
 	docker manifest push --purge $(NAME):$(VER)
-	docker manifest create $(NAME):latest $(NAME):$(GOARCH) $(NAME):$(ARCH2) $(NAME):$(ARCH3)
+	docker manifest create $(NAME):latest $(NAME):$(GOARCH) \
+	$(NAME):$(ARCH2) \
+	$(NAME):$(ARCH3)
 	docker manifest push --purge $(NAME):latest
