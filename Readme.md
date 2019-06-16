@@ -12,7 +12,7 @@ A [Docker](http://docker.com) file to build images for AMD & ARM devices with a 
 ## Details
 
 - [GitHub](https://github.com/DeftWork/samba)
-- [Deft.Work my personal blog](http://deft.work)
+- [Deft.Work my personal blog](http://deft.work/Samba)
 
 | Docker Hub | Docker Pulls | Docker Stars | Size/Layers |
 | --- | --- | --- | --- |
