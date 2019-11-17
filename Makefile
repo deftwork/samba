@@ -1,7 +1,7 @@
 SNAME ?= samba
 NAME ?= elswork/$(SNAME)
 VER ?= `cat VERSION`
-BASE ?= 3.7
+BASE ?= 3.8
 BASENAME ?= alpine:$(BASE)
 ARCH2 ?= armv7l
 ARCH3 ?= aarch64
