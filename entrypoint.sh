@@ -1,5 +1,7 @@
 #!/bin/bash
 
+GLOBAL_FILE="/config/global.conf"
+TEMPLATE_FILE="/template.conf"
 CONFIG_FILE="/etc/samba/smb.conf"
 
 initialized=`getent passwd |grep -c '^smbuser:'`
@@ -9,29 +11,11 @@ set -e
 if [ $initialized = "0" ]; then
   adduser smbuser -SHD
 
-  cat >"$CONFIG_FILE" <<EOT
-[global]
-workgroup = WORKGROUP
-netbios name = $hostname
-server string = $hostname
-security = user
-create mask = 0664
-directory mask = 0775
-force create mode = 0664
-force directory mode = 0775
-#force user = smbuser
-#force group = smbuser
-load printers = no
-printing = bsd
-printcap name = /dev/null
-disable spoolss = yes
-guest account = nobody
-max log size = 50
-map to guest = bad user
-socket options = TCP_NODELAY SO_RCVBUF=8192 SO_SNDBUF=8192
-local master = no
-dns proxy = no
-EOT
+  if [ ! -e "$GLOBAL_FILE" ]; then
+    cp $TEMPLATE_FILE $GLOBAL_FILE
+  fi
+
+  cp $GLOBAL_FILE $CONFIG_FILE
 
   while getopts ":u:s:h" opt; do
     case $opt in
@@ -53,8 +37,11 @@ Container will be configured as samba sharing server and it just needs:
                               or read-only (ro) access for specified logins
                               user1, user2, .., userN
 
+To adjust the global samba options, create a volume mapping to /config
+
 Example:
 docker run -d -p 445:445 \\
+  -v path to global config:/config \\
   -v /mnt/data:/share/data \\
   -v /mnt/backups:/share/backups \\
   trnape/rpi-samba \\
