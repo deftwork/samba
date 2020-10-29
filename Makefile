@@ -1,5 +1,5 @@
 SNAME ?= samba
-NAME ?= elswork/$(SNAME)
+RNAME ?= elswork/$(SNAME)
 VER ?= `cat VERSION`
 BASE ?= latest
 BASENAME ?= alpine:$(BASE)
@@ -21,32 +21,45 @@ help: ## This help.
 .DEFAULT_GOAL := help
 
 # DOCKER TASKS
-# Build the container
 
-debug: ## Build the container
-	docker build -t $(NAME):$(GOARCH) \
+debug: ## Debug the container
+	docker build -t $(RNAME):$(GOARCH) \
 	--build-arg BASEIMAGE=$(BASENAME) \
 	--build-arg VERSION=$(GOARCH)_$(VER) .
 build: ## Build the container
-	docker build --no-cache -t $(NAME):$(GOARCH) \
+	docker build --no-cache -t $(RNAME):$(GOARCH) \
 	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 	--build-arg VCS_REF=`git rev-parse --short HEAD` \
 	--build-arg BASEIMAGE=$(BASENAME) \
 	--build-arg VERSION=$(GOARCH)_$(VER) \
-	. > ../builds/$(SNAME)_$(GOARCH)_$(VER)_`date +"%Y%m%d_%H%M%S"`.txt
+	. > builds/$(GOARCH)_$(VER)_`date +"%Y%m%d_%H%M%S"`.txt
+bootstrap: ## Start multicompiler
+	docker buildx inspect --bootstrap
+buildx: ## Buildx the container
+	docker buildx build \
+	--platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6 \
+  	-t $(RNAME):latest -t $(RNAME):$(VER) --push \
+	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+	--build-arg VCS_REF=`git rev-parse --short HEAD` \
+	--build-arg BASEIMAGE=$(BASENAME) \
+	--build-arg VERSION=$(VER) .
 tag: ## Tag the container
-	docker tag $(NAME):$(GOARCH) $(NAME):$(GOARCH)_$(VER)
+	docker tag $(RNAME):$(GOARCH) $(RNAME):$(GOARCH)_$(VER)
 push: ## Push the container
-	docker push $(NAME):$(GOARCH)_$(VER)
-	docker push $(NAME):$(GOARCH)	
+	docker push $(RNAME):$(GOARCH)_$(VER)
+	docker push $(RNAME):$(GOARCH)	
 deploy: build tag push
 manifest: ## Create an push manifest
-	docker manifest create $(NAME):$(VER) \
-	$(NAME):$(GOARCH)_$(VER) \
-	$(NAME):$(ARCH2)_$(VER) \
-	$(NAME):$(ARCH3)_$(VER)
-	docker manifest push --purge $(NAME):$(VER)
-	docker manifest create $(NAME):latest $(NAME):$(GOARCH) \
-	$(NAME):$(ARCH2) \
-	$(NAME):$(ARCH3)
-	docker manifest push --purge $(NAME):latest
+	docker manifest create $(RNAME):$(VER) \
+	$(RNAME):$(GOARCH)_$(VER) \
+	$(RNAME):$(ARCH2)_$(VER) \
+	$(RNAME):$(ARCH3)_$(VER)
+	docker manifest push --purge $(RNAME):$(VER)
+	docker manifest create $(RNAME):latest $(RNAME):$(GOARCH) \
+	$(RNAME):$(ARCH2) \
+	$(RNAME):$(ARCH3)
+	docker manifest push --purge $(RNAME):latest
+start: ## Start samba
+	docker run -d -p 137:137/udp -p 138:138/udp -p 139:139 -p 445:445 -p 445:445/udp \
+	--hostname 'filer' --restart='unless-stopped' -v /mnt/store/smb:/share/folder \
+	elswork/samba:latest -u "pirate:PASSWORD" -s "OdroidHC1:/share/folder:rw:pirate"

@@ -18,7 +18,7 @@ LABEL mantainer="Eloy Lopez <elswork@gmail.com>" \
 RUN apk update && apk upgrade && apk add bash samba-common-tools samba && rm -rf /var/cache/apk/*
 
 COPY template.conf /
-COPY entrypoint.sh /
+COPY entrypoint.sh /entrypoint.sh
 RUN chmod u+x /entrypoint.sh
 
 EXPOSE 445 137 138 139
