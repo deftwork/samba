@@ -1,21 +1,33 @@
 #!/bin/bash
 
-GLOBAL_FILE="/config/global.conf"
-TEMPLATE_FILE="/template.conf"
 CONFIG_FILE="/etc/samba/smb.conf"
-
-initialized=`getent passwd |grep -c '^smbuser:'`
+FIRSTTIME=true
 
 hostname=`hostname`
 set -e
-if [ $initialized = "0" ]; then
-  adduser smbuser -SHD
-
-  if [ ! -e "$GLOBAL_FILE" ]; then
-    cp $TEMPLATE_FILE $GLOBAL_FILE
-  fi
-
-  cp $GLOBAL_FILE $CONFIG_FILE
+cat >"$CONFIG_FILE" <<EOT
+[global]
+workgroup = WORKGROUP
+netbios name = $hostname
+server string = $hostname
+security = user
+create mask = 0664
+directory mask = 0775
+force create mode = 0664
+force directory mode = 0775
+#force user = smbuser
+#force group = smbuser
+load printers = no
+printing = bsd
+printcap name = /dev/null
+disable spoolss = yes
+guest account = nobody
+max log size = 50
+map to guest = bad user
+socket options = TCP_NODELAY SO_RCVBUF=8192 SO_SNDBUF=8192
+local master = no
+dns proxy = no
+EOT
 
   while getopts ":u:s:h" opt; do
     case $opt in
@@ -23,13 +35,20 @@ if [ $initialized = "0" ]; then
         cat <<EOH
 Samba server container
 
+ATTENTION: This is a recipe highly adapted to my needs, it might not fit yours.
+Deal with local filesystem permissions, container permissions and Samba permissions is a Hell, so I've made a workarround to keep things as simple as possible.
+I want avoid that the usage of this conainer would affect current file permisions of my local system, so, I've "synchronized" the owner of the path to be shared with Samba user. This mean that some commitments and limitations must be assumed.
+
 Container will be configured as samba sharing server and it just needs:
  * host directories to be mounted,
- * users (one or more username:password tuples) provided,
+ * users (one or more uid:gid:username:usergroup:password tuples) provided,
  * shares defined (name, path, users).
 
- -u username:password         add user account (named 'username'), which is
-                              protected by 'password'
+ -u uid:gid:username:usergroup:password         add uid from user p.e. 1000
+                                                add gid from group that user belong p.e. 1000
+                                                add a username p.e. alice
+                                                add a usergroup (wich user must belong) p.e. alice
+                                                protected by 'password' (The password may be different from the user's actual password from your host filesystem)
 
  -s name:path:rw:user1[,user2[,userN]]
                               add share, that is visible as 'name', exposing
@@ -41,14 +60,13 @@ To adjust the global samba options, create a volume mapping to /config
 
 Example:
 docker run -d -p 445:445 \\
-  -v path to global config:/config \\
-  -v /mnt/data:/share/data \\
-  -v /mnt/backups:/share/backups \\
-  trnape/rpi-samba \\
-  -u "alice:abc123" \\
-  -u "bob:secret" \\
-  -u "guest:guest" \\
-  -s "Backup directory:/share/backups:rw:alice,bob" \\
+  -- hostname any-host-name \\ # Optional
+  -v /any/path:/share/data \\ # Replace /any/path with some path in your system owned by a real user from your host filesystem
+  elswork/samba \\
+  -u "1000:1000:alice:alice:put-any-password-here" \\ # At least the first user must match (password can be different) with a real user from your host filesystem
+  -u "1001:1001:bob:bob:secret" \\
+  -u "1002:1002:guest:guest:guest" \\
+  -s "Backup directory:/share/backups:rw:alice,bob" \\ 
   -s "Alice (private):/share/data/alice:rw:alice" \\
   -s "Bob (private):/share/data/bob:rw:bob" \\
   -s "Documents (readonly):/share/data/documents:ro:guest,alice,bob"
@@ -58,9 +76,13 @@ EOH
         ;;
       u)
         echo -n "Add user "
-        IFS=: read username password <<<"$OPTARG"
+        IFS=: read uid group username groupname password <<<"$OPTARG"
         echo -n "'$username' "
-        adduser "$username" -SHD
+        if [[ $FIRSTTIME ]] ; then
+          addgroup -g "$group" -S "$groupname"
+          adduser -u "$uid" -G "$groupname" "$username" -SHD
+          FIRSTTIME=false
+        fi
         echo -n "with password '$password' "
         echo "$password" |tee - |smbpasswd -s -a "$username"
         echo "DONE"
@@ -70,7 +92,6 @@ EOH
         IFS=: read sharename sharepath readwrite users <<<"$OPTARG"
         echo -n "'$sharename' "
         echo "[$sharename]" >>"$CONFIG_FILE"
-        chown smbuser "$sharepath"
         echo -n "path '$sharepath' "
         echo "path = \"$sharepath\"" >>"$CONFIG_FILE"
         echo -n "read"
@@ -94,7 +115,6 @@ EOH
           echo -n "$users "
           echo "valid users = $users" >>"$CONFIG_FILE"
           echo "write list = $users" >>"$CONFIG_FILE"
-          echo "admin users = $users" >>"$CONFIG_FILE"
         fi
         echo "DONE"
         ;;
@@ -108,7 +128,5 @@ EOH
         ;;
     esac
   done
-
-fi
 nmbd -D
 exec ionice -c 3 smbd -FS --no-process-group --configfile="$CONFIG_FILE" < /dev/null

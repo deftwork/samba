@@ -23,7 +23,7 @@ help: ## This help.
 # DOCKER TASKS
 
 debug: ## Debug the container
-	docker build -t $(RNAME):$(GOARCH) \
+	docker build --no-cache -t $(RNAME):$(GOARCH) \
 	--build-arg BASEIMAGE=$(BASENAME) \
 	--build-arg VERSION=$(GOARCH)_$(VER) .
 build: ## Build the container

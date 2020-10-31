@@ -15,13 +15,14 @@ LABEL mantainer="Eloy Lopez <elswork@gmail.com>" \
     org.label-schema.version=$VERSION \
     org.label-schema.schema-version="1.0"
 
-RUN apk update && apk upgrade && apk add bash samba-common-tools samba && rm -rf /var/cache/apk/*
+RUN apk update && apk upgrade && apk add bash samba-common-tools samba tzdata && rm -rf /var/cache/apk/*
 
-COPY template.conf /
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod u+x /entrypoint.sh
 
-EXPOSE 445 137 138 139
+EXPOSE 137/udp 138/udp 139 445
+
+HEALTHCHECK --interval=60s --timeout=15s CMD smbclient -L \\localhost -U % -m SMB3
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["-h"]
