@@ -35,10 +35,17 @@ build: ## Build the container
 	. > builds/$(GOARCH)_$(VER)_`date +"%Y%m%d_%H%M%S"`.txt
 bootstrap: ## Start multicompiler
 	docker buildx inspect --bootstrap
+debug: ## Build in Debug mode
+	docker buildx build \
+	-t $(RNAME):debug -t $(RNAME):$(VER) --load \
+	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+	--build-arg VCS_REF=`git rev-parse --short HEAD` \
+	--build-arg BASEIMAGE=$(BASENAME) \
+	--build-arg VERSION=$(VER) .
 buildx: ## Buildx the container
 	docker buildx build \
 	--platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6 \
-  	-t $(RNAME):latest -t $(RNAME):$(VER) --push \
+	-t $(RNAME):latest -t $(RNAME):$(VER) --push \
 	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 	--build-arg VCS_REF=`git rev-parse --short HEAD` \
 	--build-arg BASEIMAGE=$(BASENAME) \
