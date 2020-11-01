@@ -2,7 +2,7 @@ version: '3.4'
 
 services:
   samba:
-    image: elswork/samba:armv7l
+    image: elswork/samba
     environment:
       TZ: 'Europe/Madrid'
     networks:
@@ -13,7 +13,8 @@ services:
     volumes:
       - /home/pirate/docker/makefile:/share/folder
       #- /path/to/be/shared:/share/folder
-    command: '-u "$(id -u):$(id -g):$(id -un):$(id -gn):put-any-password-here" -s "SmbShare:/share/folder:rw:$(id -un)"'
+    command: '-u "1000:1000:pirate:pirate:put-any-password-here" -s "SmbShare:/share/folder:rw:pirate"'
+    # command: '-u "uid:guid:username:groupname:put-any-password-here" -s "SmbShare:/share/folder:rw:username"'
 
-networks:
-  default:
+# networks:
+  # default:

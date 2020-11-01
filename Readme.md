@@ -73,10 +73,10 @@ docker run -d -p 445:445 \
 This is my real usage command, where the user that owns the path to be shared match with the user that raise up the container:
 
 ``` sh
-docker run -d -p 445:445 --hostname $HOSTNAME -e TZ=Europe/Madrid \
+docker run -d -p 445:445 -e TZ=Europe/Madrid \
     -v /home/pirate/docker/makefile:/share/folder elswork/samba \
-    -u "$(id -u):$(id -g):$(id -un):$(id -gn):put-any-password-here" \
-    -s "SmbShare:/share/folder:rw:$(id -un)"
+    -u "1000:1000:pirate:pirate:put-any-password-here" \
+    -s "SmbShare:/share/folder:rw:pirate"
 ```
 
 

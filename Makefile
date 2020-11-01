@@ -23,7 +23,7 @@ help: ## This help.
 # DOCKER TASKS
 
 debug: ## Debug the container
-	docker build --no-cache -t $(RNAME):$(GOARCH) \
+	docker build -t $(RNAME):$(GOARCH) \
 	--build-arg BASEIMAGE=$(BASENAME) \
 	--build-arg VERSION=$(GOARCH)_$(VER) .
 build: ## Build the container
@@ -35,17 +35,16 @@ build: ## Build the container
 	. > builds/$(GOARCH)_$(VER)_`date +"%Y%m%d_%H%M%S"`.txt
 bootstrap: ## Start multicompiler
 	docker buildx inspect --bootstrap
-debug: ## Build in Debug mode
+debugx: ## Buildx in Debug mode
 	docker buildx build \
-	-t $(RNAME):debug -t $(RNAME):$(VER) --load \
-	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-	--build-arg VCS_REF=`git rev-parse --short HEAD` \
+	-t $(RNAME):debug --load \
 	--build-arg BASEIMAGE=$(BASENAME) \
 	--build-arg VERSION=$(VER) .
 buildx: ## Buildx the container
-	docker buildx build \
+	mkdir -p builds
+	docker buildx build --no-cache \
 	--platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6 \
-	-t $(RNAME):latest -t $(RNAME):$(VER) --push \
+	-t $(RNAME):latest -t $(RNAME):$(VER) --pull --push \
 	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 	--build-arg VCS_REF=`git rev-parse --short HEAD` \
 	--build-arg BASEIMAGE=$(BASENAME) \
@@ -66,7 +65,10 @@ manifest: ## Create an push manifest
 	$(RNAME):$(ARCH2) \
 	$(RNAME):$(ARCH3)
 	docker manifest push --purge $(RNAME):latest
+pull: ## Pull latest image
+	docker pull elswork/samba
 start: ## Start samba
-	docker run -d -p 137:137/udp -p 138:138/udp -p 139:139 -p 445:445 -p 445:445/udp \
-	--hostname 'filer' --restart='unless-stopped' -v /mnt/store/smb:/share/folder \
-	elswork/samba:latest -u "pirate:PASSWORD" -s "OdroidHC1:/share/folder:rw:pirate"
+	docker run -d -p 445:445 -e TZ=Europe/Madrid \
+	-v /home/pirate/docker/makefile:/share/folder elswork/samba \
+	-u "1000:1000:pirate:pirate:put-any-password-here" \
+	-s "SmbShare:/share/folder:rw:pirate"
