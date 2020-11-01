@@ -39,17 +39,17 @@ Container will be configured as samba sharing server and it just needs:
  * users (one or more uid:gid:username:usergroup:password tuples) provided,
  * shares defined (name, path, users).
 
- -u uid:gid:username:usergroup:password         add uid from user p.e. 1000
-                                                add gid from group that user belong p.e. 1000
-                                                add a username p.e. alice
-                                                add a usergroup (wich user must belong) p.e. alice
-                                                protected by 'password' (The password may be different from the user's actual password from your host filesystem)
+-u uid:gid:username:usergroup:password
 
- -s name:path:rw:user1[,user2[,userN]]
-                              add share, that is visible as 'name', exposing
-                              contents of 'path' directory for read+write (rw)
-                              or read-only (ro) access for specified logins
-                              user1, user2, .., userN 
+- uid from user p.e. 1000
+- gid from group that user belong p.e. 1000
+- username p.e. alice
+- usergroup (wich user must belong) p.e. alice
+- password (The password may be different from the user's actual password from your host filesystem)
+
+-s name:path:rw:user1[,user2[,userN]]
+
+- add share, that is visible as 'name', exposing contents of 'path' directory for read+write (rw) or read-only (ro) access for specified logins user1, user2, .., userN 
 
 ### Serve 
 
