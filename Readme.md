@@ -79,5 +79,7 @@ docker run -d -p 445:445 -e TZ=Europe/Madrid \
     -s "SmbShare:/share/folder:rw:pirate"
 ```
 
-
 On Windows point your filebrowser to `\\host-ip\` to preview site.
+
+---
+**[Sponsor me!](https://github.com/sponsors/elswork) Together we will be unstoppable.**
