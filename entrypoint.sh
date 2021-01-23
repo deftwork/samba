@@ -79,8 +79,8 @@ EOH
         IFS=: read uid group username groupname password <<<"$OPTARG"
         echo -n "'$username' "
         if [[ $FIRSTTIME ]] ; then
-          addgroup -g "$group" -S "$groupname"
-          adduser -u "$uid" -G "$groupname" "$username" -SHD
+          id -g "$groupname" &>/dev/null || addgroup -g "$group" -S "$groupname"
+          id -u "$username" &>/dev/null || adduser -u "$uid" -G "$groupname" "$username" -SHD
           FIRSTTIME=false
         fi
         echo -n "with password '$password' "
