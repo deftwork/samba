@@ -5,6 +5,8 @@ FIRSTTIME=true
 
 hostname=`hostname`
 set -e
+if [[ ! -f $CONFIG_FILE ]]
+then
 cat >"$CONFIG_FILE" <<EOT
 [global]
 workgroup = WORKGROUP
@@ -28,7 +30,7 @@ socket options = TCP_NODELAY SO_RCVBUF=8192 SO_SNDBUF=8192
 local master = no
 dns proxy = no
 EOT
-
+fi
   while getopts ":u:s:h" opt; do
     case $opt in
       h)
