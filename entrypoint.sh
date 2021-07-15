@@ -96,7 +96,7 @@ EOH
         echo "path = \"$sharepath\"" >>"$CONFIG_FILE"
         
         if [[ "show" = "$show" ]] ; then
-          echo -n "browsable "
+          echo -n "browseable "
  #         echo "browseable = yes" >>"$CONFIG_FILE"
         else
           echo -n "not-browseable "
