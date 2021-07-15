@@ -89,11 +89,18 @@ EOH
         ;;
       s)
         echo -n "Add share "
-        IFS=: read sharename sharepath readwrite users <<<"$OPTARG"
+        IFS=: read sharename sharepath show readwrite users <<<"$OPTARG"
         echo -n "'$sharename' "
         echo "[$sharename]" >>"$CONFIG_FILE"
         echo -n "path '$sharepath' "
         echo "path = \"$sharepath\"" >>"$CONFIG_FILE"
+        
+        if [[ "show" = "$show" ]] ; then
+          echo -n "browsable "
+        else
+          echo -n "not-browseable"
+        fi
+        
         echo -n "read"
         if [[ "rw" = "$readwrite" ]] ; then
           echo -n "+write "
