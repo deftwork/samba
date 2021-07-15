@@ -97,8 +97,10 @@ EOH
         
         if [[ "show" = "$show" ]] ; then
           echo -n "browsable "
+ #         echo "browseable = yes" >>"$CONFIG_FILE"
         else
-          echo -n "not-browseable"
+          echo -n "not-browseable "
+          echo "browseable = no" >>"$CONFIG_FILE"
         fi
         
         echo -n "read"
@@ -113,7 +115,10 @@ EOH
         fi
         if [[ -z "$users" ]] ; then
           echo -n "for guests: "
-          echo "browseable = yes" >>"$CONFIG_FILE"
+          if [[ "show" = "$show" ]] ; then
+            echo -n "(guest-browesable): "
+            echo "browseable = yes" >>"$CONFIG_FILE"
+          fi
           echo "guest ok = yes" >>"$CONFIG_FILE"
           echo "public = yes" >>"$CONFIG_FILE"
         else
