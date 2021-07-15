@@ -3,6 +3,12 @@
 CONFIG_FILE="/etc/samba/smb.conf"
 FIRSTTIME=true
 
+if [[ -z "$DISABLE_SOCKET_OPTIONS" ]] ; then
+  COMMENT_IT=""
+else
+  COMMENT_IT="# "
+fi
+
 hostname=`hostname`
 set -e
 cat >"$CONFIG_FILE" <<EOT
@@ -24,8 +30,7 @@ disable spoolss = yes
 guest account = nobody
 max log size = 50
 map to guest = bad user
-# socket options caused slow performance on my network
-# socket options = TCP_NODELAY SO_RCVBUF=8192 SO_SNDBUF=8192
+${COMMENT_IT}socket options = TCP_NODELAY SO_RCVBUF=8192 SO_SNDBUF=8192
 local master = no
 dns proxy = no
 EOT
