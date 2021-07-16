@@ -3,6 +3,12 @@
 CONFIG_FILE="/etc/samba/smb.conf"
 FIRSTTIME=true
 
+if [[ -z "$DISABLE_SOCKET_OPTIONS" ]] ; then
+  COMMENT_IT=""
+else
+  COMMENT_IT="# "
+fi
+
 hostname=`hostname`
 set -e
 cat >"$CONFIG_FILE" <<EOT
@@ -24,7 +30,7 @@ disable spoolss = yes
 guest account = nobody
 max log size = 50
 map to guest = bad user
-socket options = TCP_NODELAY SO_RCVBUF=8192 SO_SNDBUF=8192
+${COMMENT_IT}socket options = TCP_NODELAY SO_RCVBUF=8192 SO_SNDBUF=8192
 local master = no
 dns proxy = no
 EOT
@@ -50,10 +56,12 @@ Container will be configured as samba sharing server and it just needs:
                                                 add a usergroup (wich user must belong) p.e. alice
                                                 protected by 'password' (The password may be different from the user's actual password from your host filesystem)
 
- -s name:path:rw:user1[,user2[,userN]]
-                              add share, that is visible as 'name', exposing
-                              contents of 'path' directory for read+write (rw)
-                              or read-only (ro) access for specified logins
+ -s name:path:show:rw:user1[,user2[,userN]]
+                              add a share that is accessible as 'name', exposing
+                              contents of 'path' directory. 'show' or 'noshow'
+                              controls whether this 'name' is browsable or not.
+                              this share also has read+write (rw) or read-only (ro)
+                              access control for specified logins
                               user1, user2, .., userN
 
 To adjust the global samba options, create a volume mapping to /config
@@ -66,10 +74,10 @@ docker run -d -p 445:445 \\
   -u "1000:1000:alice:alice:put-any-password-here" \\ # At least the first user must match (password can be different) with a real user from your host filesystem
   -u "1001:1001:bob:bob:secret" \\
   -u "1002:1002:guest:guest:guest" \\
-  -s "Backup directory:/share/backups:rw:alice,bob" \\ 
-  -s "Alice (private):/share/data/alice:rw:alice" \\
-  -s "Bob (private):/share/data/bob:rw:bob" \\
-  -s "Documents (readonly):/share/data/documents:ro:guest,alice,bob"
+  -s "Backup directory:/share/backups:show:rw:alice,bob" \\ 
+  -s "Alice (private):/share/data/alice:show:rw:alice" \\
+  -s "Bob (private):/share/data/bob:hidden:rw:bob" \\ # Bob's private share does not show up when user is browsing the shares
+  -s "Documents (readonly):/share/data/documents:show:ro:guest,alice,bob"
 
 EOH
         exit 1
@@ -89,11 +97,20 @@ EOH
         ;;
       s)
         echo -n "Add share "
-        IFS=: read sharename sharepath readwrite users <<<"$OPTARG"
+        IFS=: read sharename sharepath show readwrite users <<<"$OPTARG"
         echo -n "'$sharename' "
         echo "[$sharename]" >>"$CONFIG_FILE"
         echo -n "path '$sharepath' "
         echo "path = \"$sharepath\"" >>"$CONFIG_FILE"
+        
+        if [[ "show" = "$show" ]] ; then
+          echo -n "browseable "
+          # echo "browseable = yes" >>"$CONFIG_FILE" # browseable = yes is the default behavior
+        else
+          echo -n "not-browseable "
+          echo "browseable = no" >>"$CONFIG_FILE"
+        fi
+        
         echo -n "read"
         if [[ "rw" = "$readwrite" ]] ; then
           echo -n "+write "
@@ -106,7 +123,10 @@ EOH
         fi
         if [[ -z "$users" ]] ; then
           echo -n "for guests: "
-          echo "browseable = yes" >>"$CONFIG_FILE"
+          if [[ "show" = "$show" ]] ; then
+            echo -n "(guest-browesable): "
+            echo "browseable = yes" >>"$CONFIG_FILE"
+          fi
           echo "guest ok = yes" >>"$CONFIG_FILE"
           echo "public = yes" >>"$CONFIG_FILE"
         else
