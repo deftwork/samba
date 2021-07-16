@@ -76,7 +76,7 @@ docker run -d -p 445:445 \\
   -u "1002:1002:guest:guest:guest" \\
   -s "Backup directory:/share/backups:show:rw:alice,bob" \\ 
   -s "Alice (private):/share/data/alice:show:rw:alice" \\
-  -s "Bob (private):/share/data/bob:noshow:rw:bob" \\ # Bob's private share does not show up when user is browsing the shares
+  -s "Bob (private):/share/data/bob:hidden:rw:bob" \\ # Bob's private share does not show up when user is browsing the shares
   -s "Documents (readonly):/share/data/documents:show:ro:guest,alice,bob"
 
 EOH
