@@ -47,9 +47,9 @@ Container will be configured as samba sharing server and it just needs:
 - usergroup (wich user must belong) p.e. alice
 - password (The password may be different from the user's actual password from your host filesystem)
 
--s name:path:rw:user1[,user2[,userN]]
+-s name:path:show:rw:user1[,user2[,userN]]
 
-- add share, that is visible as 'name', exposing contents of 'path' directory for read+write (rw) or read-only (ro) access for specified logins user1, user2, .., userN 
+- add a share that is accessible as 'name', exposing contents of 'path' directory. 'show' or 'hidden' controls whether this 'name' is browsable or not. this share also has read+write (rw) or read-only (ro)access control for specified logins user1, user2, .., userN
 
 ### Serve 
 
@@ -64,10 +64,10 @@ docker run -d -p 445:445 \
   -u "1000:1000:alice:alice:put-any-password-here" \ # At least the first user must match (password can be different) with a real user from your host filesystem
   -u "1001:1001:bob:bob:secret" \
   -u "1002:1002:guest:guest:guest" \
-  -s "Backup directory:/share/backups:rw:alice,bob" \ 
-  -s "Alice (private):/share/data/alice:rw:alice" \
-  -s "Bob (private):/share/data/bob:rw:bob" \
-  -s "Documents (readonly):/share/data/documents:ro:guest,alice,bob"
+  -s "Backup directory:/share/backups:show:rw:alice,bob" \ 
+  -s "Alice (private):/share/data/alice:show:rw:alice" \
+  -s "Bob (private):/share/data/bob:hidden:rw:bob" \ # Bob's private share does not show up when user is browsing the shares
+  -s "Documents (readonly):/share/data/documents:show:ro:guest,alice,bob"
 ``` 
 
 This is my real usage command:
@@ -76,7 +76,7 @@ This is my real usage command:
 docker run -d -p 445:445 -e TZ=Europe/Madrid \
     -v /home/pirate/docker/makefile:/share/folder elswork/samba \
     -u "1000:1000:pirate:pirate:put-any-password-here" \
-    -s "SmbShare:/share/folder:rw:pirate"
+    -s "SmbShare:/share/folder:show:rw:pirate"
 ```
 or this if the user that owns the path to be shared match with the user that raise up the container:
 
@@ -84,7 +84,7 @@ or this if the user that owns the path to be shared match with the user that rai
 docker run -d -p 445:445 --hostname $HOSTNAME -e TZ=Europe/Madrid \
     -v /home/pirate/docker/makefile:/share/folder elswork/samba \
     -u "$(id -u):$(id -g):$(id -un):$(id -gn):put-any-password-here" \
-    -s "SmbShare:/share/folder:rw:$(id -un)"
+    -s "SmbShare:/share/folder:show:rw:$(id -un)"
 ```
 
 On Windows point your filebrowser to `\\host-ip\` to preview site.
