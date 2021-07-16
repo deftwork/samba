@@ -51,12 +51,19 @@ Container will be configured as samba sharing server and it just needs:
 
 - add a share that is accessible as 'name', exposing contents of 'path' directory. 'show' or 'hidden' controls whether this 'name' is browsable or not. this share also has read+write (rw) or read-only (ro)access control for specified logins user1, user2, .., userN
 
+### Environmental Variable(s)
+- `DISABLE_SOCKET_OPTIONS`, by default, the `[global]` section of the container's `smb.conf` will contain the line:
+   ```
+   socket options = TCP_NODELAY SO_RCVBUF=8192 SO_SNDBUF=8192
+   ```
+   This may cause slow transfer for some use cases. In order to disable this line, add `-e DISABLE_SOCKET_OPTIONS=yes` to `docker run`.
+
 ### Serve 
 
 Start a samba fileshare.
 
 ``` sh
-docker run -d -p 445:445 \
+docker run -d -p 139:139 -p 445:445 \
   -- hostname any-host-name \ # Optional
   -e TZ=Europe/Madrid \ # Optional
   -v /any/path:/share/data \ # Replace /any/path with some path in your system owned by a real user from your host filesystem
