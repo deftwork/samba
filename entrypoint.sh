@@ -134,7 +134,9 @@ EOH
           users=$(echo "$users" |tr "," " ")
           echo -n "$users "
           echo "valid users = $users" >>"$CONFIG_FILE"
-          echo "write list = $users" >>"$CONFIG_FILE"
+          if [[ "rw" = "$readwrite" ]] ; then
+            echo "write list = $users" >>"$CONFIG_FILE"
+          fi
         fi
         echo "DONE"
         ;;
