@@ -15,7 +15,7 @@ LABEL mantainer="Eloy Lopez <elswork@gmail.com>" \
     org.label-schema.version=$VERSION \
     org.label-schema.schema-version="1.0"
 
-RUN apk update && apk upgrade && apk add bash samba-common-tools samba tzdata && rm -rf /var/cache/apk/*
+RUN apk update && apk upgrade && apk add --no-cache bash samba-common-tools samba tzdata && rm -rf /var/cache/apk/*
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod u+x /entrypoint.sh
