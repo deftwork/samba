@@ -68,7 +68,7 @@ manifest: ## Create an push manifest
 pull: ## Pull latest image
 	docker pull elswork/samba
 start: ## Start samba
-	docker run -d -p 445:445 -e TZ=Europe/Madrid \
+	docker run -d -p 139:139 -p 445:445 -e TZ=Europe/Madrid \
 	-v /home/pirate/docker/makefile:/share/folder elswork/samba \
 	-u "1000:1000:pirate:pirate:put-any-password-here" \
 	-s "SmbShare:/share/folder:rw:pirate"

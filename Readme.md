@@ -56,7 +56,7 @@ Container will be configured as samba sharing server and it just needs:
 Start a samba fileshare.
 
 ``` sh
-docker run -d -p 445:445 \
+docker run -d -p 139:139 -p 445:445 \
   -- hostname any-host-name \ # Optional
   -e TZ=Europe/Madrid \ # Optional
   -v /any/path:/share/data \ # Replace /any/path with some path in your system owned by a real user from your host filesystem
@@ -73,7 +73,7 @@ docker run -d -p 445:445 \
 This is my real usage command:
 
 ``` sh
-docker run -d -p 445:445 -e TZ=Europe/Madrid \
+docker run -d -p 139:139 -p 445:445 -e TZ=Europe/Madrid \
     -v /home/pirate/docker/makefile:/share/folder elswork/samba \
     -u "1000:1000:pirate:pirate:put-any-password-here" \
     -s "SmbShare:/share/folder:rw:pirate"
@@ -81,7 +81,7 @@ docker run -d -p 445:445 -e TZ=Europe/Madrid \
 or this if the user that owns the path to be shared match with the user that raise up the container:
 
 ``` sh
-docker run -d -p 445:445 --hostname $HOSTNAME -e TZ=Europe/Madrid \
+docker run -d -p 139:139 -p 445:445 --hostname $HOSTNAME -e TZ=Europe/Madrid \
     -v /home/pirate/docker/makefile:/share/folder elswork/samba \
     -u "$(id -u):$(id -g):$(id -un):$(id -gn):put-any-password-here" \
     -s "SmbShare:/share/folder:rw:$(id -un)"

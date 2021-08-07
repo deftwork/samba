@@ -8,6 +8,7 @@ services:
     networks:
       - default
     ports:
+      - "139:139"
       - "445:445"
     restart: unless-stopped
     volumes:
