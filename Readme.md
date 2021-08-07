@@ -16,7 +16,7 @@ A [Docker](http://docker.com) file to build images for many platforms (linux/amd
 
 | Docker Hub | Docker Pulls | Docker Stars | Size/Layers |
 | --- | --- | --- | --- |
-| [samba](https://hub.docker.com/r/elswork/samba "elswork/samba on Docker Hub") | [![](https://img.shields.io/docker/pulls/elswork/samba.svg)](https://hub.docker.com/r/elswork/samba "elswork/samba on Docker Hub") | [![](https://img.shields.io/docker/stars/elswork/samba.svg)](https://hub.docker.com/r/elswork/samba "elswork/samba on Docker Hub") | [![](https://images.microbadger.com/badges/image/elswork/samba.svg)](https://microbadger.com/images/elswork/samba "elswork/samba on microbadger.com") |
+| [samba](https://hub.docker.com/r/elswork/samba "elswork/samba on Docker Hub") | [![Docker Pulls](https://img.shields.io/docker/pulls/elswork/samba.svg)](https://hub.docker.com/r/elswork/samba "elswork/samba on Docker Hub") | [![Docker Stars](https://img.shields.io/docker/stars/elswork/samba.svg)](https://hub.docker.com/r/elswork/samba "elswork/samba on Docker Hub") | [![Size/Layers](https://images.microbadger.com/badges/image/elswork/samba.svg)](https://microbadger.com/images/elswork/samba "elswork/samba on microbadger.com") |
 
 ## Build Instructions
 
@@ -35,23 +35,24 @@ Deal with local filesystem permissions, container permissions and Samba permissi
 I want avoid that the usage of this conainer would affect current file permisions of my local system, so, I've "synchronized" the owner of the path to be shared with Samba user. This mean that some commitments and limitations must be assumed.
 
 Container will be configured as samba sharing server and it just needs:
- * host directories to be mounted,
- * users (one or more uid:gid:username:usergroup:password tuples) provided,
- * shares defined (name, path, users).
+
+- host directories to be mounted,
+- users (one or more uid:gid:username:usergroup:password tuples) provided,
+- shares defined (name, path, users).
 
 -u uid:gid:username:usergroup:password
 
 - uid from user p.e. 1000
 - gid from group that user belong p.e. 1000
 - username p.e. alice
-- usergroup (wich user must belong) p.e. alice
+- usergroup (the one to whom user belongs) p.e. alice
 - password (The password may be different from the user's actual password from your host filesystem)
 
 -s name:path:rw:user1[,user2[,userN]]
 
-- add share, that is visible as 'name', exposing contents of 'path' directory for read+write (rw) or read-only (ro) access for specified logins user1, user2, .., userN 
+- add share, that is visible as 'name', exposing contents of 'path' directory for read+write (rw) or read-only (ro) access for specified logins user1, user2, .., userN
 
-### Serve 
+### Serve
 
 Start a samba fileshare.
 
@@ -68,7 +69,7 @@ docker run -d -p 139:139 -p 445:445 \
   -s "Alice (private):/share/data/alice:rw:alice" \
   -s "Bob (private):/share/data/bob:rw:bob" \
   -s "Documents (readonly):/share/data/documents:ro:guest,alice,bob"
-``` 
+```
 
 This is my real usage command:
 
@@ -78,6 +79,7 @@ docker run -d -p 139:139 -p 445:445 -e TZ=Europe/Madrid \
     -u "1000:1000:pirate:pirate:put-any-password-here" \
     -s "SmbShare:/share/folder:rw:pirate"
 ```
+
 or this if the user that owns the path to be shared match with the user that raise up the container:
 
 ``` sh
