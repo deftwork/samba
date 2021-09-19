@@ -119,7 +119,7 @@ EOH
           echo "valid users = $users" >>"$CONFIG_FILE"
           echo "write list = $users" >>"$CONFIG_FILE"
         fi
-        if [[ -z "$recycle" ]] ; then
+        if [[ -n "$recycle" ]] ; then
           echo -n "with recycle bin '$recycle'"
           echo "vfs objects = recycle" >>"$CONFIG_FILE"
           echo "recycle:repository = $recycle" >>"$CONFIG_FILE"
