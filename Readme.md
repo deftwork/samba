@@ -48,9 +48,9 @@ Container will be configured as samba sharing server and it just needs:
 - usergroup (the one to whom user belongs) p.e. alice
 - password (The password may be different from the user's actual password from your host filesystem)
 
--s name:path:rw:user1[,user2[,userN]]
+-s name:path:rw:user1[,user2[,userN]][:recycle]
 
-- add share, that is visible as 'name', exposing contents of 'path' directory for read+write (rw) or read-only (ro) access for specified logins user1, user2, .., userN
+- add share, that is visible as 'name', exposing contents of 'path' directory for read+write (rw) or read-only (ro) access for specified logins user1, user2, .., userN ; Add optional recycle arg to activate recycle with value as dirname
 
 ### Serve
 
@@ -65,8 +65,8 @@ docker run -d -p 139:139 -p 445:445 \
   -u "1000:1000:alice:alice:put-any-password-here" \ # At least the first user must match (password can be different) with a real user from your host filesystem
   -u "1001:1001:bob:bob:secret" \
   -u "1002:1002:guest:guest:guest" \
-  -s "Backup directory:/share/backups:rw:alice,bob" \ 
-  -s "Alice (private):/share/data/alice:rw:alice" \
+  -s "Backup directory:/share/backups:rw:alice,bob" \
+  -s "Alice (private):/share/data/alice:rw:alice:.recycle-bin" \
   -s "Bob (private):/share/data/bob:rw:bob" \
   -s "Documents (readonly):/share/data/documents:ro:guest,alice,bob"
 ```
