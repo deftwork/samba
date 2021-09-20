@@ -120,7 +120,7 @@ EOH
           echo "write list = $users" >>"$CONFIG_FILE"
         fi
         if [[ -n "$recycle" ]] ; then
-          echo -n "with recycle bin '$recycle'"
+          echo -n "with recycle bin '$recycle' "
           echo "vfs objects = recycle" >>"$CONFIG_FILE"
           echo "recycle:repository = $recycle" >>"$CONFIG_FILE"
           echo "recycle:keeptree = yes" >>"$CONFIG_FILE"
