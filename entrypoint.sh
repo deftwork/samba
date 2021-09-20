@@ -86,7 +86,7 @@ EOH
           id -u "$uid" &>/dev/null || id -un "$username" &>/dev/null || adduser -u "$uid" -G "$groupname" "$username" -SHD
           FIRSTTIME=false
         fi
-        echo -n "with password '$password' "
+        echo -n "with password '${password:0:1}***${password: -1}' "
         echo "$password" |tee - |smbpasswd -s -a "$username"
         echo "DONE"
         ;;
