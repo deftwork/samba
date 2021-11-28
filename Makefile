@@ -1,18 +1,15 @@
 SNAME ?= samba
 RNAME ?= elswork/$(SNAME)
 VER ?= `cat VERSION`
-BASE ?= latest
-BASENAME ?= alpine:$(BASE)
-ARCH2 ?= armv7l
-ARCH3 ?= aarch64
-GOARCH := $(shell uname -m)
-ifeq ($(GOARCH),x86_64)
-	GOARCH := amd64
-endif
+BASENAME ?= alpine:latest
+TARGET_PLATFORM ?= linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/arm/v7,linux/arm/v6
+NO_CACHE ?= 
+# NO_CACHE ?= --no-cache
+# linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6
 
 # HELP
 # This will output the help for each task
-# thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
+
 .PHONY: help
 
 help: ## This help.
@@ -22,51 +19,40 @@ help: ## This help.
 
 # DOCKER TASKS
 
+# Build image
+
 debug: ## Debug the container
-	docker build -t $(RNAME):$(GOARCH) \
+	docker build -t $(RNAME):debug \
 	--build-arg BASEIMAGE=$(BASENAME) \
-	--build-arg VERSION=$(GOARCH)_$(VER) .
+	--build-arg VERSION=$(VER) .
 build: ## Build the container
-	docker build --no-cache -t $(RNAME):$(GOARCH) \
+	mkdir -p builds
+	docker build $(NO_CACHE) -t $(RNAME):$(VER) -t $(RNAME):latest \
 	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 	--build-arg VCS_REF=`git rev-parse --short HEAD` \
 	--build-arg BASEIMAGE=$(BASENAME) \
-	--build-arg VERSION=$(GOARCH)_$(VER) \
-	. > builds/$(GOARCH)_$(VER)_`date +"%Y%m%d_%H%M%S"`.txt
+	--build-arg VERSION=$(VER) \
+	. > builds/$(VER)_`date +"%Y%m%d_%H%M%S"`.txt
 bootstrap: ## Start multicompiler
 	docker buildx inspect --bootstrap
 debugx: ## Buildx in Debug mode
 	docker buildx build \
-	-t $(RNAME):debug --pull --load \
+	--platform ${TARGET_PLATFORM} \
+	-t $(RNAME):debug --pull \
 	--build-arg BASEIMAGE=$(BASENAME) \
 	--build-arg VERSION=$(VER) .
 buildx: ## Buildx the container
-	mkdir -p builds
-	docker buildx build --no-cache \
-	--platform linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6 \
-	-t $(RNAME):latest -t $(RNAME):$(VER) --pull --push \
+	docker buildx build $(NO_CACHE) \
+	--platform ${TARGET_PLATFORM} \
+	-t ghcr.io/$(RNAME):$(VER) -t ghcr.io/$(RNAME):latest \
+	-t $(RNAME):$(VER) -t $(RNAME):latest --pull --push \
 	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 	--build-arg VCS_REF=`git rev-parse --short HEAD` \
 	--build-arg BASEIMAGE=$(BASENAME) \
 	--build-arg VERSION=$(VER) .
-tag: ## Tag the container
-	docker tag $(RNAME):$(GOARCH) $(RNAME):$(GOARCH)_$(VER)
-push: ## Push the container
-	docker push $(RNAME):$(GOARCH)_$(VER)
-	docker push $(RNAME):$(GOARCH)	
-deploy: build tag push
-manifest: ## Create an push manifest
-	docker manifest create $(RNAME):$(VER) \
-	$(RNAME):$(GOARCH)_$(VER) \
-	$(RNAME):$(ARCH2)_$(VER) \
-	$(RNAME):$(ARCH3)_$(VER)
-	docker manifest push --purge $(RNAME):$(VER)
-	docker manifest create $(RNAME):latest $(RNAME):$(GOARCH) \
-	$(RNAME):$(ARCH2) \
-	$(RNAME):$(ARCH3)
-	docker manifest push --purge $(RNAME):latest
-pull: ## Pull latest image
-	docker pull elswork/samba
+
+# Operations
+
 start: ## Start samba
 	docker run -d -p 139:139 -p 445:445 -e TZ=Europe/Madrid \
 	-v /home/pirate/docker/makefile:/share/folder elswork/samba \

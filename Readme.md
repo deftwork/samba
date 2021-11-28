@@ -11,20 +11,18 @@ A [Docker](http://docker.com) file to build images for many platforms (linux/amd
 
 ## Details
 
-- [GitHub](https://github.com/DeftWork/samba)
-- [Deft.Work my personal blog](http://deft.work/Samba)
+| Website | GitHub | Docker Hub |
+| --- | --- | --- |
+| [Deft.Work my personal blog](https://deft.work/Samba) | [Samba](https://github.com/DeftWork/samba) | [Samba](https://hub.docker.com/r/elswork/samba) |
 
-| Docker Hub | Docker Pulls | Docker Stars | Size/Layers |
+| Docker Pulls | Docker Stars | Size | Sponsors |
 | --- | --- | --- | --- |
-| [samba](https://hub.docker.com/r/elswork/samba "elswork/samba on Docker Hub") | [![Docker Pulls](https://img.shields.io/docker/pulls/elswork/samba.svg)](https://hub.docker.com/r/elswork/samba "elswork/samba on Docker Hub") | [![Docker Stars](https://img.shields.io/docker/stars/elswork/samba.svg)](https://hub.docker.com/r/elswork/samba "elswork/samba on Docker Hub") | [![Size/Layers](https://images.microbadger.com/badges/image/elswork/samba.svg)](https://microbadger.com/images/elswork/samba "elswork/samba on microbadger.com") |
+| [![Docker pulls](https://img.shields.io/docker/pulls/elswork/samba.svg)](https://hub.docker.com/r/elswork/samba "samba on Docker Hub") | [![Docker stars](https://img.shields.io/docker/stars/elswork/samba.svg)](https://hub.docker.com/r/elswork/samba "samba on Docker Hub") | [![Docker Image size](https://img.shields.io/docker/image-size/elswork/samba)](https://hub.docker.com/r/elswork/samba "samba on Docker Hub") | [![GitHub Sponsors](https://img.shields.io/github/sponsors/elswork)](https://github.com/sponsors/elswork "Sponsor me!") |
 
-## Build Instructions
+## Compatible Architectures
 
-Build for amd64, armv7l, aarch64 architecture (thanks to its [Multi-Arch](https://blog.docker.com/2017/11/multi-arch-all-the-things/) base image)
-
-``` sh
-docker build -t elswork/samba .
-```
+This image has been builded using [buildx](https://docs.docker.com/buildx/working-with-buildx/) for this architectures: 
+- amd64 arm64 ppc64le s390x ~~386~~ arm/v7 arm/v6
 
 ## Usage
 
