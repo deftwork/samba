@@ -1,11 +1,14 @@
 SNAME ?= samba
 RNAME ?= elswork/$(SNAME)
+ONAME ?= deftwork/$(SNAME)
 VER ?= `cat VERSION`
 BASENAME ?= alpine:latest
 TARGET_PLATFORM ?= linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6
+# linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6
 NO_CACHE ?= 
 # NO_CACHE ?= --no-cache
-# linux/amd64,linux/arm64,linux/ppc64le,linux/s390x,linux/386,linux/arm/v7,linux/arm/v6
+#MODE ?= debug
+MODE ?= $(VER)
 
 # HELP
 # This will output the help for each task
@@ -44,7 +47,7 @@ debugx: ## Buildx in Debug mode
 buildx: ## Buildx the container
 	docker buildx build $(NO_CACHE) \
 	--platform ${TARGET_PLATFORM} \
-	-t ghcr.io/$(RNAME):$(VER) -t ghcr.io/$(RNAME):latest \
+	-t ghcr.io/$(ONAME):$(VER) -t ghcr.io/$(ONAME):latest \
 	-t $(RNAME):$(VER) -t $(RNAME):latest --pull --push \
 	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 	--build-arg VCS_REF=`git rev-parse --short HEAD` \
@@ -55,6 +58,6 @@ buildx: ## Buildx the container
 
 start: ## Start samba
 	docker run -d -p 139:139 -p 445:445 -e TZ=Europe/Madrid \
-	-v /home/pirate/docker/makefile:/share/folder elswork/samba \
+	-v /home/pirate/docker/makefile:/share/folder $(RNAME):$(MODE) \
 	-u "1000:1000:pirate:pirate:put-any-password-here" \
 	-s "SmbShare:/share/folder:rw:pirate"
