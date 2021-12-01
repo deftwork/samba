@@ -131,4 +131,4 @@ EOH
     esac
   done
 nmbd -D
-exec ionice -c 3 smbd -FS --no-process-group --configfile="$CONFIG_FILE" < /dev/null
+exec ionice -c 3 smbd -F --no-process-group --configfile="$CONFIG_FILE" < /dev/null
