@@ -33,12 +33,11 @@ fi
       f)
         echo -n "Add force user and group "
         IFS=: read username groupname <<<"$OPTARG"
-        echo -n "'$username' and '$groupname'"
+        echo "'$username' and '$groupname'"
         echo "force user = \"$username\"" >>"$CONFIG_FILE"
         echo "force group = \"$groupname\"" >>"$CONFIG_FILE"
         echo "DONE"
         ;;
-    case $opt in
       h)
         cat <<EOH
 Samba server container
