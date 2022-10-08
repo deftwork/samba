@@ -34,6 +34,7 @@ fi
         echo -n "Add force user and group "
         IFS=: read username groupname <<<"$OPTARG"
         echo "'$username' and '$groupname'"
+        echo "[global]" >>"$CONFIG_FILE"
         echo "force user = \"$username\"" >>"$CONFIG_FILE"
         echo "force group = \"$groupname\"" >>"$CONFIG_FILE"
         echo "DONE"
