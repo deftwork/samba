@@ -51,11 +51,12 @@ Container will be configured as samba sharing server and it just needs:
                                                 add a usergroup (wich user must belong) p.e. alice
                                                 protected by 'password' (The password may be different from the user's actual password from your host filesystem)
 
- -s name:path:rw:user1[,user2[,userN]]
+ -s name:path:rw:user1[,user2[,userN]][:recycle]
                               add share, that is visible as 'name', exposing
                               contents of 'path' directory for read+write (rw)
                               or read-only (ro) access for specified logins
-                              user1, user2, .., userN
+                              user1, user2, .., userN ; Add optional recycle
+                              arg to activate recycle with value as dirname
 
 To adjust the global samba options, create a volume mapping to /config
 
@@ -67,8 +68,8 @@ docker run -d -p 445:445 \\
   -u "1000:1000:alice:alice:put-any-password-here" \\ # At least the first user must match (password can be different) with a real user from your host filesystem
   -u "1001:1001:bob:bob:secret" \\
   -u "1002:1002:guest:guest:guest" \\
-  -s "Backup directory:/share/backups:rw:alice,bob" \\ 
-  -s "Alice (private):/share/data/alice:rw:alice" \\
+  -s "Backup directory:/share/backups:rw:alice,bob" \\
+  -s "Alice (private):/share/data/alice:rw:alice:.recycle-bin" \\
   -s "Bob (private):/share/data/bob:rw:bob" \\
   -s "Documents (readonly):/share/data/documents:ro:guest,alice,bob"
 
@@ -87,7 +88,7 @@ EOH
         ;;
       s)
         echo -n "Add share "
-        IFS=: read sharename sharepath readwrite users <<<"$OPTARG"
+        IFS=: read sharename sharepath readwrite users recycle <<<"$OPTARG"
         echo -n "'$sharename' "
         echo "[$sharename]" >>"$CONFIG_FILE"
         echo -n "path '$sharepath' "
@@ -113,6 +114,14 @@ EOH
           echo -n "$users "
           echo "valid users = $users" >>"$CONFIG_FILE"
           echo "write list = $users" >>"$CONFIG_FILE"
+        fi
+        if [[ -n "$recycle" ]] ; then
+          echo -n "with recycle bin '$recycle' "
+          echo "vfs objects = recycle" >>"$CONFIG_FILE"
+          echo "recycle:repository = $recycle" >>"$CONFIG_FILE"
+          echo "recycle:keeptree = yes" >>"$CONFIG_FILE"
+          echo "recycle:versions = yes" >>"$CONFIG_FILE"
+          echo "recycle:directory_mode = 0775" >>"$CONFIG_FILE" # Same than "force directory mode"
         fi
         echo "DONE"
         ;;
