@@ -17,6 +17,8 @@ LABEL mantainer="Eloy Lopez <elswork@gmail.com>" \
 
 RUN apk update && apk upgrade && apk add --no-cache bash samba-common-tools samba tzdata && rm -rf /var/cache/apk/*
 
+RUN sed -i '/\[homes\]/,/writable/ s/^/;/' /etc/samba/smb.conf
+
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod u+x /entrypoint.sh
 
