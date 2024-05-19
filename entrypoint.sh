@@ -16,8 +16,6 @@ create mask = 0664
 directory mask = 0775
 force create mode = 0664
 force directory mode = 0775
-#force user = smbuser
-#force group = smbuser
 load printers = no
 printing = bsd
 printcap name = /dev/null
@@ -30,8 +28,17 @@ local master = no
 dns proxy = no
 EOT
 fi
-  while getopts ":u:s:h" opt; do
+  while getopts ":f:u:s:h" opt; do
     case $opt in
+      f)
+        echo -n "Add force user and group "
+        IFS=: read username groupname <<<"$OPTARG"
+        echo "'$username' and '$groupname'"
+        echo "[global]" >>"$CONFIG_FILE"
+        echo "force user = \"$username\"" >>"$CONFIG_FILE"
+        echo "force group = \"$groupname\"" >>"$CONFIG_FILE"
+        echo "DONE"
+        ;;
       h)
         cat <<EOH
 Samba server container
