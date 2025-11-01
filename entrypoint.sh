@@ -30,7 +30,7 @@ local master = no
 dns proxy = no
 EOT
 fi
-  while getopts ":u:s:h" opt; do
+  while getopts ":u:s:p:h" opt; do
     case $opt in
       h)
         cat <<EOH
@@ -90,6 +90,41 @@ EOH
         IFS=: read sharename sharepath readwrite users <<<"$OPTARG"
         echo -n "'$sharename' "
         echo "[$sharename]" >>"$CONFIG_FILE"
+        echo -n "path '$sharepath' "
+        echo "path = \"$sharepath\"" >>"$CONFIG_FILE"
+        echo -n "read"
+        if [[ "rw" = "$readwrite" ]] ; then
+          echo -n "+write "
+          echo "read only = no" >>"$CONFIG_FILE"
+          echo "writable = yes" >>"$CONFIG_FILE"
+        else
+          echo -n "-only "
+          echo "read only = yes" >>"$CONFIG_FILE"
+          echo "writable = no" >>"$CONFIG_FILE"
+        fi
+        if [[ -z "$users" ]] ; then
+          echo -n "for guests: "
+          echo "browseable = yes" >>"$CONFIG_FILE"
+          echo "guest ok = yes" >>"$CONFIG_FILE"
+          echo "public = yes" >>"$CONFIG_FILE"
+        else
+          echo -n "for users: "
+          users=$(echo "$users" |tr "," " ")
+          echo -n "$users "
+          echo "valid users = $users" >>"$CONFIG_FILE"
+          echo "write list = $users" >>"$CONFIG_FILE"
+        fi
+        echo "DONE"
+        ;;
+      p)
+        echo -n "Add share async"
+        IFS=: read sharename sharepath readwrite users <<<"$OPTARG"
+        echo -n "'$sharename' "
+        echo "[$sharename]" >>"$CONFIG_FILE"
+        echo "strict sync = no" >> "$CONFIG_FILE"
+        echo "sync always = no" >> "$CONFIG_FILE"
+        echo "aio read size = 1" >> "$CONFIG_FILE"
+        echo "aio write size = 1" >> "$CONFIG_FILE"
         echo -n "path '$sharepath' "
         echo "path = \"$sharepath\"" >>"$CONFIG_FILE"
         echo -n "read"
