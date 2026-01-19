@@ -4,6 +4,7 @@ CONFIG_FILE="/etc/samba/smb.conf"
 
 hostname=`hostname`
 set -e
+rm -rf $CONFIG_FILE # fix for docker restart: config data will append multiple times
 if [[ ! -f $CONFIG_FILE ]]
 then
 cat >"$CONFIG_FILE" <<EOT
@@ -107,6 +108,7 @@ EOH
           echo "browseable = yes" >>"$CONFIG_FILE"
           echo "guest ok = yes" >>"$CONFIG_FILE"
           echo "public = yes" >>"$CONFIG_FILE"
+          echo "security = share" >>"$CONFIG_FILE" # for everyone without pwd
         else
           echo -n "for users: "
           users=$(echo "$users" |tr "," " ")
